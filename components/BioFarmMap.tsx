@@ -75,7 +75,7 @@ const BioFarmMap = () => {
   //
 
   // Aggregate data with potential filters
-  const aggregateData = (data: RawDataProps[]) => {
+  const aggregateData = useCallback((data: RawDataProps[]) => {
     // Filter data by year
     const filteredDataByYear = data.filter(
       (d) => d.annee === selectedYear.toString()
@@ -197,7 +197,7 @@ const BioFarmMap = () => {
     setAggregatedData(aggregated);
     setAggregatedData2007(arrayAggregatedData2007);
     setAggregatedData2022(arrayAggregatedData2022);
-  };
+  }, [rawData, selectedProductions, selectedYear]);
 
   const handlePlayClick = () => {
     setIsPlaying(!isPlaying);
@@ -211,7 +211,7 @@ const BioFarmMap = () => {
     label: type,
     value: type,
   }));
-  const allProductionsOption = { label: "All Production Types", value: "ALL" };
+  const allProductionsOption = { label: "Tout type", value: "ALL" };
   const options = [allProductionsOption, ...standardOptions];
 
   // Fetch data and send to states
@@ -219,7 +219,6 @@ const BioFarmMap = () => {
     d3.dsv(";", "/data/surfaces-2007-2022.csv").then((data) => {
       // To see the data in the console
       setRawData(data);
-      aggregateData(data);
       setProductionTypes(new Set(data.map((d) => d.production)));
     });
   }, []);
@@ -227,7 +226,7 @@ const BioFarmMap = () => {
   // Update aggregated data when filters change
   useEffect(() => {
     aggregateData(rawData);
-  }, [rawData, selectedProductions, selectedYear]);
+  }, [rawData, selectedProductions, selectedYear, aggregateData]);
 
   // Handle dropdown changes
   const handleDropdownChange = (selectedOptions: any) => {
@@ -238,13 +237,15 @@ const BioFarmMap = () => {
       )
     ) {
       // If "All Production Types" is selected, select all options
-      setSelectedProductions(new Set(options.map((option) => option.value)));
+      setSelectedProductions(new Set(["ALL"]));
     } else {
       // Else, update normally
       const selectedValues = selectedOptions.map((option: any) => option.value);
       setSelectedProductions(new Set(selectedValues));
     }
   };
+
+  console.log(selectedProductions);
 
   useEffect(() => {
     let intervalId: any;
@@ -261,12 +262,14 @@ const BioFarmMap = () => {
   }, [isPlaying, selectedYear]);
 
   return (
-    <div className="flex flex-row gap-3 items-center">
+    <div className="flex flex-row  items-center justify-around w-screen">
       <div className="flex flex-col p-12 gap-12">
-        <h2 className="text-2xl font-bold">Choix du Filtre:</h2>
+        <div className="mb-auto">
+          <h2 className="text-2xl font-bold">Choix du Filtre:</h2>
+        </div>
         <div className="flex flex-col gap-12">
           <div className="flex align-middle gap-3">
-            <span className="my-auto">Type de production: </span>
+            <span className="my-auto">Production: </span>
             <div>
               {isClient && (
                 <ReactSelect
@@ -277,8 +280,8 @@ const BioFarmMap = () => {
                   options={options}
                   isMulti
                   onChange={handleDropdownChange}
-                  placeholder="Select productions"
-                  className="w-[40rem] my-4"
+                  placeholder="Choix du type de production"
+                  className="w-[30rem] my-4"
                 />
               )}
             </div>
@@ -293,7 +296,7 @@ const BioFarmMap = () => {
                   max="2022"
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                  className="w-[40rem] mx-3"
+                  className="w-[30rem] mx-3"
                 />
               </div>
               <div className="flex justify-between mt-1">
@@ -321,7 +324,7 @@ const BioFarmMap = () => {
           </div>
         </div>
       </div>
-      <div className="flex flex-col  items-center my-4">
+      <div className="flex flex-col  items-center my-12">
         <div className="flex gap-6 justify-between">
           <div
             className={`cursor-pointer p-2 font-semibold ${
@@ -340,9 +343,9 @@ const BioFarmMap = () => {
             Carte
           </div>
         </div>
-        <div className="flex flex-col md:min-w-[50rem] md:min-h-[40rem] w-full  bg-gray-100">
+        <div className="flex flex-col md:min-w-[45rem] md:min-h-[40rem] w-full  bg-gray-100">
           {isLoading ? (
-            <div className="flex justify-center items-center md:h-[40rem] w-full align-middle bg-gray-100">
+            <div className="flex justify-center items-center md:h-[40rem] md:min-w-[45rem] w-full align-middle bg-gray-100">
               <svg
                 className="animate-spin h-10 w-10 text-green-500"
                 xmlns="http://www.w3.org/2000/svg"

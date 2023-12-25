@@ -55,11 +55,6 @@ const FranceMap = ({
         .domain([minAttributeValue, maxAttributeValue])
         .range(d3.quantize(d3.interpolateGreens, numSegments) as any);
 
-      // const colorScale = d3.scaleSequential(
-      //   [minAttributeValue, maxAttributeValue],
-      //   d3.interpolateGreens
-      // );
-
       // Augmenting GeoJSON with aggregated data
       regions.features.forEach((feature: any) => {
         const regionData = aggregatedData.find(
@@ -103,15 +98,12 @@ const FranceMap = ({
     .domain([minAttributeValue, maxAttributeValue])
     .range(d3.quantize(d3.interpolateGreens, numSegments) as any);
 
-
-  // const colorScale = d3.scaleSequential(
-  //   [minAttributeValue, maxAttributeValue],
-  //   d3.interpolateGreens
-  // );
-
   return (
-    <div className="flex flex-col w-[800px] items-start">
-      <div className="flex">
+    <div className="flex flex-col w-[45rem] items-center">
+      <div className="flex mb-4">
+        <span>
+          <h2 className="text-lg mr-4">Choix de l&apos;attribut: </h2>
+        </span>
         <select
           value={selectedAttribute}
           onChange={(e: any) => setSelectedAttribute(e.target.value)}
@@ -127,7 +119,7 @@ const FranceMap = ({
         </select>
       </div>
 
-      <div className="flex flex-grow">
+      <div className="flex w-full">
         <svg ref={mapRef} width={800} height={600}></svg>
       </div>
       <div className="flex flex-col items-center w-full border px-6 py-4 bg-slate-50">

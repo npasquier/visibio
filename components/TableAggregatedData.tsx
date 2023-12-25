@@ -15,7 +15,7 @@ const TableAggregatedData = ({
   aggregatedData: AggregatedDataProps[];
 }) => {
   return (
-    <div className="md:h-[40rem] h-[20rem] w-[50rem] overflow-y-auto">
+    <div className="md:h-[40rem] h-[20rem] w-[45rem] overflow-y-auto">
       <table className="min-w-full divide-y divide-gray-200 table-fixed">
         <thead className="bg-gray-50 sticky top-0">
           <tr>
