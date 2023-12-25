@@ -3,9 +3,9 @@ import NavigationCard from "@/components/NavigationCard";
 export default function Page() {
   return (
     <main className="flex-grow p-4 flex flex-col items-center gap-4">
-      <div className="flex flex-col items-center  gap-4 my-20">
+      <div className="flex flex-col items-center 2xl:my-12 my-8 ">
 
-        <p className="text-xl">Choissisez le type de production en France.</p>
+        <p className="text-xl my-4">Choissisez le type de production en France.</p>
       </div>
 
       <div className="flex justify-around w-[90rem]">

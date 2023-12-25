@@ -3,8 +3,8 @@ import NavigationCard from "@/components/NavigationCard";
 export default function Page() {
   return (
     <main className="flex-grow p-4 flex flex-col items-center gap-4">
-      <div className="flex flex-col items-center  gap-4 my-20">
-        <p className="text-xl">
+      <div className="flex flex-col items-center  2xl:my-12 my-8">
+        <p className="text-xl my-4">
           Choissisez le type d&apos;évolution à visualiser.
         </p>
       </div>
@@ -17,7 +17,7 @@ export default function Page() {
           description="Visualiser l'évolution des surfaces bio en France par régions
           ou département. Vous pouvez également comparer les surfaces bio en
           filtrant par type de production (raisin de cuve, noix, etc.)"
-          style="h-[250px] w-[300px]"
+          style="h-[220px] w-[300px]"
         />
         <NavigationCard
           path={"/production/surface/conversion"}
@@ -26,7 +26,7 @@ export default function Page() {
           description="Visualiser l'évolution des conversions bio en France par régions
           ou département. Vous pouvez également comparer les conversions bio en
           filtrant par type de production (poules, bovins, etc.)"
-          style="h-[250px] w-[300px]"
+          style="h-[220px] w-[300px]"
         />
       </div>
     </main>

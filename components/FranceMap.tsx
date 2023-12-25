@@ -19,16 +19,15 @@ const FranceMap = ({
   aggregatedData,
   aggregatedData2007,
   aggregatedData2022,
+  passedAttribute,
 }: {
   aggregatedData: AggregatedDataProps[];
   aggregatedData2007: AggregatedDataProps[];
   aggregatedData2022: AggregatedDataProps[];
+  passedAttribute: keyof AggregatedDataProps;
 }) => {
   const [regions, setRegions] = useState<any>(null);
   const mapRef = useRef(null);
-
-  const [selectedAttribute, setSelectedAttribute] =
-    useState<keyof AggregatedDataProps>("surfabSum");
 
   useEffect(() => {
     fetch("/data/regions.geojson")
@@ -44,10 +43,10 @@ const FranceMap = ({
   useEffect(() => {
     if (regions && aggregatedData.length > 0) {
       const maxAttributeValue = Math.max(
-        ...aggregatedData2022.map((d) => Number(d[selectedAttribute]))
+        ...aggregatedData2022.map((d) => Number(d[passedAttribute]))
       );
       const minAttributeValue = Math.min(
-        ...aggregatedData2007.map((d) => Number(d[selectedAttribute]))
+        ...aggregatedData2007.map((d) => Number(d[passedAttribute]))
       );
 
       const colorScale = d3
@@ -61,7 +60,7 @@ const FranceMap = ({
           (d) => d.region === feature.properties.nom
         );
         feature.properties.value = regionData
-          ? Number(regionData[selectedAttribute])
+          ? Number(regionData[passedAttribute])
           : "NA";
       });
 
@@ -81,14 +80,20 @@ const FranceMap = ({
         .attr("d", (d: any) => pathGenerator(d) as string)
         .attr("fill", (d: any) => colorScale(d.properties.value));
     }
-  }, [regions, aggregatedData, selectedAttribute, aggregatedData2007, aggregatedData2022]);
+  }, [
+    regions,
+    aggregatedData,
+    passedAttribute,
+    aggregatedData2007,
+    aggregatedData2022,
+  ]);
 
   // Copy color scale for Legend
   const maxAttributeValue = Math.max(
-    ...aggregatedData2022.map((d) => Number(d[selectedAttribute]))
+    ...aggregatedData2022.map((d) => Number(d[passedAttribute]))
   );
   const minAttributeValue = Math.min(
-    ...aggregatedData2007.map((d) => Number(d[selectedAttribute]))
+    ...aggregatedData2007.map((d) => Number(d[passedAttribute]))
   );
 
   const numSegments = 20;
@@ -99,32 +104,13 @@ const FranceMap = ({
     .range(d3.quantize(d3.interpolateGreens, numSegments) as any);
 
   return (
-    <div className="flex flex-col w-[45rem] items-center">
-      <div className="flex mb-4">
-        <span>
-          <h2 className="text-lg mr-4">Choix de l&apos;attribut: </h2>
-        </span>
-        <select
-          value={selectedAttribute}
-          onChange={(e: any) => setSelectedAttribute(e.target.value)}
-        >
-          <option value="nbExpSum">Nombre d&apos;exploitations engagées</option>
-          <option value="surfabSum">Surface Bio à terme (ha)</option>
-          <option value="surfc1Sum">Surface Bio 1ère année (ha) </option>
-          <option value="surfc2Sum">Surface Bio 2ème année (ha)</option>
-          <option value="surfc3Sum">Surface Bio 3ème année (ha)</option>
-          <option value="surfc123Sum">Surface Bio en conversion (ha)</option>
-          <option value="surfbioSum">Surface Bio engagée (ha)</option>
-          {/* Add other options here */}
-        </select>
-      </div>
-
-      <div className="flex w-full">
+    <div className="flex flex-col h-full">
+      <div className="flex w-full scale-95 max-xl:scale-90">
         <svg ref={mapRef} width={800} height={600}></svg>
       </div>
       <div className="flex flex-col items-center w-full border px-6 py-4 bg-slate-50">
         <span>
-          <h2 className="text-lg mb-4 ">Légende</h2>
+          <h2 className="text-lg mb-4">Légende</h2>
         </span>
         {colorScale ? (
           <Legend colorScale={colorScale} />

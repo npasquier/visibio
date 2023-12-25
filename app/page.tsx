@@ -4,15 +4,17 @@ import Link from "next/link";
 export default function Page() {
   return (
     <main className="p-4 flex flex-col items-center h-full">
-      <div className="flex flex-col items-center gap-6 my-12 h-full justify-normal">
+      <div className="flex flex-col items-center gap-6 max-2xl:gap-3 2xl:my-12 my-4 justify-around">
         <h2 className="text-3xl font-bold">Cartographie du Bio en France</h2>
 
-        <h4 className="text-xl">Analyse de la production bio en France métropolitaine.</h4>
+        <h4 className="text-xl">
+          Analyse de la production bio en France métropolitaine.
+        </h4>
 
         <div className="flex flex-col items-center gap-3">
           <p className="text-md">
-            Cette application vous permet de visualiser l&apos;évolution de la production bio en France
-            métropolitaine.
+            Cette application vous permet de visualiser l&apos;évolution de la
+            production bio en France métropolitaine.
           </p>
 
           <p className="text-md">
@@ -31,8 +33,7 @@ export default function Page() {
         </div>
 
         <p className="text-sm mt-auto">
-          Les données utilisées sont celles de l&apos;Agence
-          BIO.
+          Les données utilisées sont celles de l&apos;Agence BIO.
         </p>
       </div>
     </main>
