@@ -3,17 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import Legend from "./Legend";
-
-interface AggregatedDataProps {
-  region: string;
-  surfabSum: number;
-  nbExpSum: number;
-  surfc1Sum: number;
-  surfc2Sum: number;
-  surfc3Sum: number;
-  surfc123Sum: number;
-  surfbioSum: number;
-}
+import { AggregatedDataProps } from "@/interface/data";
 
 const FranceMap = ({
   aggregatedData,
@@ -104,13 +94,13 @@ const FranceMap = ({
     .range(d3.quantize(d3.interpolateGreens, numSegments) as any);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex w-full scale-95 max-xl:scale-90">
+    <div className="flex flex-col h-full max-2xl:scale-95">
+      <div className="flex w-full 2xl:scale-95 scale-90">
         <svg ref={mapRef} width={800} height={600}></svg>
       </div>
-      <div className="flex flex-col items-center w-full border px-6 py-4 bg-slate-50">
+      <div className="flex flex-col items-center w-full border px-6 py-4 bg-slate-50 max-2xl:-mt-12 max-2xl:scale-90">
         <span>
-          <h2 className="text-lg mb-4">Légende</h2>
+          <h2 className="text-lg max-2xl:mb-4 max-2xl:text-sm mb-4">Légende</h2>
         </span>
         {colorScale ? (
           <Legend colorScale={colorScale} />

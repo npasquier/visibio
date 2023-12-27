@@ -26,7 +26,7 @@ export default function RootLayout({
         <header className="flex bg-green-800 text-gray-50 p-2 gap-3 align-middle shadow-lg rounded-b-full">
           <Link href="/" className="flex gap-4 mx-auto">
             <Image src="/farm.svg" alt="farm" width={40} height={40} />
-            <h1 className="text-xl font-bold my-auto">VisiBio</h1>
+            <h1 className="text-xl font-bold my-auto text-slate-100">VisiBio</h1>
           </Link>
         </header>
           {children}

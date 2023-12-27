@@ -4,53 +4,48 @@ import React, { useCallback, useEffect, useState } from "react";
 import * as d3 from "d3";
 import TableAggregatedData from "./TableAggregatedData";
 import FranceMap from "./FranceMap";
-import ReactSelect from "react-select";
+import Select from "react-select";
+import { AggregatedDataProps, RawDataProps } from "@/interface/data";
+import { aggregator } from "@/lib/aggregate";
+import { translator } from "@/lib/translate";
 
-interface RawDataProps {
-  [key: string]: string;
-}
-
-interface AggregatedDataProps {
-  region: string;
-  surfabSum: number;
-  nbExpSum: number;
-  surfc1Sum: number;
-  surfc2Sum: number;
-  surfc3Sum: number;
-  surfc123Sum: number;
-  surfbioSum: number;
-}
-
-const BioFarmMap = () => {
+const BioFarmMap = ({
+  defaultAttribute,
+  dataBaseName,
+  attributeArray,
+  keysToSum,
+  selector,
+}: {
+  defaultAttribute: keyof AggregatedDataProps;
+  dataBaseName: string;
+  attributeArray: { abrev: string; value: string }[];
+  keysToSum: string[];
+  selector: string;
+}) => {
   // Play history of surface
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
   // Fix for SSR and Select component
-  const [isClient, setIsClient] = useState(false);
+  const [isClient, setIsClient] = useState<boolean>(false);
+
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   // Tabs and loading state
   const [activeTab, setActiveTab] = useState<string>("Graph");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleTabClick = (tabName: string) => {
-    setIsLoading(true);
-    setActiveTab(tabName);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-  };
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Filter by production type
-  const [productionTypes, setProductionTypes] = useState(new Set<string>());
+  const [productionTypes, setProductionTypes] = useState<Set<string>>(
+    new Set<string>()
+  );
   const [selectedProductions, setSelectedProductions] = useState<Set<string>>(
     new Set(["ALL"])
   );
 
   //Filter by year
-  const [selectedYear, setSelectedYear] = useState(2022);
+  const [selectedYear, setSelectedYear] = useState<number>(2022);
 
   //Design the year slider
   const yearMarkers = [];
@@ -70,143 +65,28 @@ const BioFarmMap = () => {
     AggregatedDataProps[]
   >([]);
 
-  //
+  // Handle tab clicks and loading state
+  const handleTabClick = (tabName: string) => {
+    setIsLoading(true);
+    setActiveTab(tabName);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+  };
 
   // Aggregate data with potential filters
-  const aggregateData = useCallback(
-    (data: RawDataProps[]) => {
-      // Filter data by year
-      const filteredDataByYear = data.filter(
-        (d) => d.annee === selectedYear.toString()
-      );
-
-      // Numeric years
-      const basedYear2022 = rawData.filter((d) => d.annee === "2022");
-      const basedYear2007 = rawData.filter((d) => d.annee === "2007");
-
-      // Filter data for year of interest
-      const isAllSelected = selectedProductions.has("ALL");
-      const filteredData = isAllSelected
-        ? filteredDataByYear
-        : filteredDataByYear.filter((d) =>
-            selectedProductions.has(d.production)
-          );
-
-      // Filter data for numeric years
-      const filteredData2022 = isAllSelected
-        ? basedYear2022
-        : basedYear2022.filter((d) => selectedProductions.has(d.production));
-      const filteredData2007 = isAllSelected
-        ? basedYear2007
-        : basedYear2007.filter((d) => selectedProductions.has(d.production));
-
-      // Aggregate filtered data
-      const sumByRegion = d3.rollup(
-        filteredData,
-        (v) => {
-          return {
-            surfabSum: d3.sum(v, (d) => parseFloat(d.surfab.replace(",", "."))),
-            surfc1Sum: d3.sum(v, (d) => parseFloat(d.surfc1.replace(",", "."))),
-            surfc2Sum: d3.sum(v, (d) => parseFloat(d.surfc2.replace(",", "."))),
-            surfc3Sum: d3.sum(v, (d) => parseFloat(d.surfc3.replace(",", "."))),
-            surfc123Sum: d3.sum(v, (d) =>
-              parseFloat(d.surfc123.replace(",", "."))
-            ),
-            surfbioSum: d3.sum(v, (d) =>
-              parseFloat(d.surfbio.replace(",", "."))
-            ),
-            nbExpSum: d3.sum(v, (d) => parseInt(d.nb_exp)),
-          };
-        },
-        (d) => d.nomregion
-      );
-
-      // Aggregate filtered data for numeric years
-      const sumByRegion2022 = d3.rollup(
-        filteredData2022,
-        (v) => {
-          return {
-            surfabSum: d3.sum(v, (d) => parseFloat(d.surfab.replace(",", "."))),
-            surfc1Sum: d3.sum(v, (d) => parseFloat(d.surfc1.replace(",", "."))),
-            surfc2Sum: d3.sum(v, (d) => parseFloat(d.surfc2.replace(",", "."))),
-            surfc3Sum: d3.sum(v, (d) => parseFloat(d.surfc3.replace(",", "."))),
-            surfc123Sum: d3.sum(v, (d) =>
-              parseFloat(d.surfc123.replace(",", "."))
-            ),
-            surfbioSum: d3.sum(v, (d) =>
-              parseFloat(d.surfbio.replace(",", "."))
-            ),
-            nbExpSum: d3.sum(v, (d) => parseInt(d.nb_exp)),
-          };
-        },
-        (d) => d.nomregion
-      );
-      const sumByRegion2007 = d3.rollup(
-        filteredData2007,
-        (v) => {
-          return {
-            surfabSum: d3.sum(v, (d) => parseFloat(d.surfab.replace(",", "."))),
-            surfc1Sum: d3.sum(v, (d) => parseFloat(d.surfc1.replace(",", "."))),
-            surfc2Sum: d3.sum(v, (d) => parseFloat(d.surfc2.replace(",", "."))),
-            surfc3Sum: d3.sum(v, (d) => parseFloat(d.surfc3.replace(",", "."))),
-            surfc123Sum: d3.sum(v, (d) =>
-              parseFloat(d.surfc123.replace(",", "."))
-            ),
-            surfbioSum: d3.sum(v, (d) =>
-              parseFloat(d.surfbio.replace(",", "."))
-            ),
-            nbExpSum: d3.sum(v, (d) => parseInt(d.nb_exp)),
-          };
-        },
-        (d) => d.nomregion
-      );
-
-      // Convert to array
-      const aggregated = Array.from(sumByRegion, ([region, values]) => ({
-        region,
-        surfabSum: values.surfabSum,
-        surfc1Sum: values.surfc1Sum,
-        surfc2Sum: values.surfc2Sum,
-        surfc3Sum: values.surfc3Sum,
-        surfc123Sum: values.surfc123Sum,
-        surfbioSum: values.surfbioSum,
-        nbExpSum: values.nbExpSum,
-      }));
-
-      // Convert to array numeric years
-      const arrayAggregatedData2007 = Array.from(
-        sumByRegion2007,
-        ([region, values]) => ({
-          region,
-          surfabSum: values.surfabSum,
-          surfc1Sum: values.surfc1Sum,
-          surfc2Sum: values.surfc2Sum,
-          surfc3Sum: values.surfc3Sum,
-          surfc123Sum: values.surfc123Sum,
-          surfbioSum: values.surfbioSum,
-          nbExpSum: values.nbExpSum,
-        })
-      );
-      const arrayAggregatedData2022 = Array.from(
-        sumByRegion2022,
-        ([region, values]) => ({
-          region,
-          surfabSum: values.surfabSum,
-          surfc1Sum: values.surfc1Sum,
-          surfc2Sum: values.surfc2Sum,
-          surfc3Sum: values.surfc3Sum,
-          surfc123Sum: values.surfc123Sum,
-          surfbioSum: values.surfbioSum,
-          nbExpSum: values.nbExpSum,
-        })
-      );
-
-      setAggregatedData(aggregated);
-      setAggregatedData2007(arrayAggregatedData2007);
-      setAggregatedData2022(arrayAggregatedData2022);
-    },
-    [rawData, selectedProductions, selectedYear]
-  );
+  const aggregateData = useCallback(() => {
+    const response = aggregator(
+      rawData,
+      selectedProductions,
+      selectedYear,
+      keysToSum,
+      selector
+    );
+    setAggregatedData(response.aggregatedData);
+    setAggregatedData2007(response.aggregatedData2007);
+    setAggregatedData2022(response.aggregatedData2022);
+  }, [rawData, selectedProductions, selectedYear, keysToSum, selector]);
 
   const handlePlayClick = () => {
     setIsPlaying(!isPlaying);
@@ -216,27 +96,28 @@ const BioFarmMap = () => {
   };
 
   const [selectedAttribute, setSelectedAttribute] =
-    useState<keyof AggregatedDataProps>("surfabSum");
+    useState<keyof AggregatedDataProps>(defaultAttribute);
 
   // Set up options for dropdown
   const standardOptions = Array.from(productionTypes).map((type) => ({
-    label: type,
+    label: translator(type),
     value: type,
   }));
+
   const allProductionsOption = { label: "Tout type", value: "ALL" };
   const options = [allProductionsOption, ...standardOptions];
 
   // Fetch data and send to states
   useEffect(() => {
-    d3.dsv(";", "/data/surfaces-2007-2022.csv").then((data) => {
+    d3.dsv(";", "/data/" + dataBaseName + ".csv").then((data) => {
       setRawData(data);
-      setProductionTypes(new Set(data.map((d) => d.production)));
+      setProductionTypes(new Set(data.map((d) => d[selector])));
     });
-  }, []);
+  }, [dataBaseName, selector]);
 
   // Update aggregated data when filters change
   useEffect(() => {
-    aggregateData(rawData);
+    aggregateData();
   }, [rawData, selectedProductions, selectedYear, aggregateData]);
 
   // Handle dropdown changes
@@ -254,7 +135,6 @@ const BioFarmMap = () => {
       setSelectedProductions(new Set(selectedValues));
     }
   };
-
 
   useEffect(() => {
     let intervalId: any;
@@ -281,7 +161,7 @@ const BioFarmMap = () => {
             <span className="my-auto">Production : </span>
             <div>
               {isClient && (
-                <ReactSelect
+                <Select
                   inputId="my-custom-select"
                   value={Array.from(selectedProductions).map((prod) =>
                     options.find((option) => option.value === prod)
@@ -339,17 +219,11 @@ const BioFarmMap = () => {
               value={selectedAttribute}
               onChange={(e: any) => setSelectedAttribute(e.target.value)}
             >
-              <option value="nbExpSum">
-                Nombre d&apos;exploitations engagées
-              </option>
-              <option value="surfabSum">Surface Bio à terme (ha)</option>
-              <option value="surfc1Sum">Surface Bio 1ère année (ha) </option>
-              <option value="surfc2Sum">Surface Bio 2ème année (ha)</option>
-              <option value="surfc3Sum">Surface Bio 3ème année (ha)</option>
-              <option value="surfc123Sum">
-                Surface Bio en conversion (ha)
-              </option>
-              <option value="surfbioSum">Surface Bio engagée (ha)</option>
+              {attributeArray.map((attribute) => (
+                <option key={attribute.abrev} value={attribute.abrev}>
+                  {attribute.value}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -373,9 +247,9 @@ const BioFarmMap = () => {
             Carte
           </div>
         </div>
-        <div className="flex flex-col w-[45rem] h-[40rem] overflow-hidden bg-gray-100">
+        <div className="flex flex-col w-[45rem] h-[40rem] 2xl:h-[45rem] overflow-hidden bg-gray-100">
           {isLoading ? (
-            <div className="flex justify-center items-center h-[40rem] w-[45rem] align-middle bg-gray-100">
+            <div className="flex justify-center items-center h-[40rem] 2xl:h-[45rem]  w-[45rem] align-middle bg-gray-100">
               <svg
                 className="animate-spin h-10 w-10 text-green-500"
                 xmlns="http://www.w3.org/2000/svg"
@@ -400,8 +274,11 @@ const BioFarmMap = () => {
           ) : (
             <>
               {activeTab === "Aggregated Data" && (
-                <div className="max-xl:h-[40rem] h-[45rem] w-[45rem] ">
-                  <TableAggregatedData aggregatedData={aggregatedData} />
+                <div className="h-[40rem] 2xl:h-[45rem]  w-[45rem] ">
+                  <TableAggregatedData
+                    aggregatedData={aggregatedData}
+                    attributeArray={attributeArray}
+                  />
                 </div>
               )}
 
